@@ -1,0 +1,51 @@
+<html>
+	<head>
+		<!-- CSS only -->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+		<title>Hace bonito :/</title>
+	</head>
+	<body>
+			<section>
+				<h1 class="text-center p-5" >ADMINISTRADOR DE BASES DE DATOS WEB</h1>
+				<div class="text-center p-5 m-5">
+					<div  class="input-group mb-3">
+						<span class="input-group-text">MOTOR:</span>
+						<select id="motor"  class="form-select">
+						<option value="POSTGRES">POSTGRES</option>
+						<option value="REDIS">REDIS</option>
+						<option value="FIREBIRD">FIREBIRD</option>
+					</select>
+				</div>
+				<br>
+				<div  class="input-group mb-3">
+					<span class="input-group-text">OPERACION:</span>
+					<select id="operacion"  class="form-select">
+						<option value="INSERT">INSERT</option>
+						<option value="UPDATE">UPDATE</option>
+						<option value="DELETE">DELETE</option>
+						<option value="SELECT">SELECT</option>
+					</select>
+				</div>
+				<br>
+				<div class="input-group mb-3">
+					<span class="input-group-text">TABLA:</span>
+					<input type="text" id="tabla" value="clientes" class="form-control">
+				</div>
+				<br>
+				<div class="input-group mb-3">
+					<span class="input-group-text">DATOS:</span>
+					<input type="text" id="id" placeholder="ID" class="form-control">
+					<input type="text" id="nombre" placeholder="NOMBRE" class="form-control">
+				</div>
+				<br>
+				<button class="btn btn-primary">EJECUTAR</button>
+				<br>
+				</div>
+			</section>
+			<section  class="text-center p-5 m-5">
+				<table class="table">
+				</table>
+			</section>
+		<script src="./index.js"></script>
+	</body>	
+</html>
