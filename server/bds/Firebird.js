@@ -7,7 +7,7 @@ class Firebird {
         this.options.database = 'C:\\Users\\Fran Zoia\\Desktop\\UNLu\\Base de datos II\\UNLU.fdb';
         this.options.user = 'sysdba';
         this.options.password = 'masterkey';
-        this.options.lowercase_keys = false; // set to true to lowercase keys
+        this.options.lowercase_keys = true; // set to true to lowercase keys
         this.options.role = null;            // default
         this.options.pageSize = 4096;        // default when creating database
         this.options.pageSize = 4096;        // default when creating database
@@ -42,16 +42,59 @@ class Firebird {
             });
         });
     }
-    async select(query)
-    {
-        var pool = firebird.pool(5, this.options);
-        pool.get(function(err, db) {
-        db.query('SELECT * FROM TABLE'+ query[2], function(err, result) {
-                // IMPORTANT: release the pool connection
+
+    async update(query){
+        query[4] = query[4].split('=');
+        this.firebird.attach(this.options, function (err, db) {
+            if (err)
+                throw err;
+            db.query("UPDATE " + query[2] + " SET "+  query[4][0] +" = '" + query[4][1] + "' WHERE ID = " + query[3] , function (err, result) {
+                if (err)
+                    throw err;
                 db.detach();
-                console.log(result);
             });
         });
+    }
+    
+    async attach () {
+        const self = this;
+        return new Promise(function(res, rej) {
+            self.firebird.attach(self.options,  function(err, db) {
+              if (err) {
+                return rej(err);
+              }
+
+              res(db);
+            })
+        })
+    }
+
+    async query (db, query) {
+        return new Promise(function(res, rej) {
+            db.query(query, function(err, result)  {
+                if(err) {
+                    return rej(err);
+                }
+                
+                res(result);
+            });
+        })
+    }
+
+    async select(query)
+    {
+       const db = await this.attach(),
+             _query = 'SELECT * FROM ' + query[2],
+             result = await this.query(db, _query);
+        
+        for (var row of result) {
+            row.nombre = row.nombre.toString();
+
+        }
+        
+        db.detach();
+        
+        return result;
    }
 }
 

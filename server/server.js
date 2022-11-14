@@ -75,7 +75,7 @@ const server = net.createServer(function (socket) {
 
 				break; 
 			case 'FIREBIRD':
-				firebird = new Firebird();
+				 var firebird = new Firebird();
 				
 				if (query[1] === 'INSERT'){
 					await firebird.insert(query);
@@ -87,14 +87,21 @@ const server = net.createServer(function (socket) {
 					return;
 				}
 
-				if (query[1] === 'SELECT'){
-					await firebird.select(query);
+				if(query[1] === 'UPDATE'){
+					await firebird.update(query);
 					return;
 				}
 
-				break;
+				if (query[1] === 'SELECT'){
+					var datos = await firebird.select(query);
+					console.log(datos);
+					socket.write(JSON.stringify(datos));
+					socket.write('.');
+					return ;	
+				}
 
-		
+				break;
+		/*
 			case 'RETHINKDB':			
 				if (query[1] === 'INSERT') {
 					await rethink.insert(query);
@@ -122,7 +129,7 @@ const server = net.createServer(function (socket) {
 				
 				socket.write(query[1] + ' NO IMPLEMENTADO AUN.');
 				break;
-
+			*/
 			default:
 				socket.write(query[0] + ' NO IMPLEMENTADO AUN.');
 				break;
