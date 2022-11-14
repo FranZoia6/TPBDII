@@ -5,6 +5,7 @@ const { Console } = require('console');
 const Postgres = require("./bds/Postgres");
 const Redis = require("./bds/Redis");
 const Firebird = require("./bds/Firebird");
+const Mongodb = require("./bds/Mongodb")
 const rethink = require("./bds/Rethink");
 // -----------------------------------------------
 
@@ -100,6 +101,35 @@ const server = net.createServer(function (socket) {
 					return ;	
 				}
 
+				break;
+
+			case 'MONGODB':
+				var mongodb = new Mongodb;
+				if (query[1] === 'INSERT'){
+					mongodb.insert(query);
+					socket.write('.');
+					return
+				}
+
+				if(query[1] === 'DELETE'){
+					mongodb.delete(query);
+					socket.write('.');
+					return
+				}
+
+				if (query[1] === 'UPDATE'){
+					mongodb.update(query);
+					socket.write('.');
+					return
+				}
+
+				if (query[1] === 'SELECT'){
+					var datos = await mongodb.select(query);
+					console.log(datos);
+					socket.write(JSON.stringify(datos));
+					socket.write('.');
+					return
+				}
 				break;
 		/*
 			case 'RETHINKDB':			
