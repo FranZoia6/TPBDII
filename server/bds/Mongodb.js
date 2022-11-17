@@ -14,10 +14,10 @@ class Mongodb {
     }
 
     async insert(query){
-        query[4] = query[4].split('=');
+        //query[4] = query[4].split('=');
         await this.client.connect();
         const db = this.client.db(this.dbName);
-        const collection = db.collection('clientes');
+        const collection = db.collection(query[2]);
         await collection.insertOne({ id: query[3], nombre:  query[4][1]});
         this.client.close();
         return;
@@ -26,7 +26,7 @@ class Mongodb {
     async delete(query){
         await this.client.connect();
         const db = this.client.db(this.dbName);
-        const collection = db.collection('clientes');
+        const collection = db.collection(query[2]);
         await collection.deleteOne({id: query[3]});
         this.client.close();
         return;
@@ -36,7 +36,7 @@ class Mongodb {
         query[4] = query[4].split('=');
         await this.client.connect();
         const db = this.client.db(this.dbName);
-        const collection = db.collection('clientes');
+        const collection = db.collection(query[2]);
         await collection.updateOne({id: query[3]},{$set:{nombre: query[4][1]}});
         this.client.close();
         return;
@@ -45,7 +45,7 @@ class Mongodb {
     async select(query){
         await this.client.connect();
         const db = this.client.db(this.dbName);
-        const collection = db.collection('clientes');
+        const collection = db.collection(query[2]);
         const result = await collection.find({}).toArray();
         this.client.close();
         return result;

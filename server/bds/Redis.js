@@ -10,7 +10,7 @@ class Redis{
 
    async insert(query){
         await this.client.connect();   
-        query[4] = query[4].split('=');
+        //query[4] = query[4].split('=');
         this.client.set(query[3], query[4][1]);
         this.client.quit();
         return;

@@ -19,7 +19,7 @@ class Firebird {
     }
 
     async insert(query) {
-        query[4] = query[4].split('=');
+        //query[4] = query[4].split('=');
         this.firebird.attach(this.options, function (err, db) {
 
             if (err)
