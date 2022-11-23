@@ -18,8 +18,10 @@ class Postgres {
 
     async insert(query) {
         const model = await this.setModel(query);
+        console.log(query);
         let row = {};
         query[4] = query[4].split('=');
+        console.log(query);
         row[query[4][0]] = query[4][1];
         await model.create(row);
         return;
