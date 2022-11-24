@@ -11,7 +11,7 @@ class Redis{
    async insert(query){
         await this.client.connect();   
         //query[4] = query[4].split('=');
-        this.client.set(query[3], query[4][1]);
+        this.client.set(query[2], query[3][1]);
         this.client.quit();
         return;
     } 
@@ -30,7 +30,7 @@ class Redis{
 
     async delete(query){
         await this.client.connect();   
-        this.client.del(query[3]);
+        this.client.del(query[2]);
         this.client.quit();
         return;
     } 

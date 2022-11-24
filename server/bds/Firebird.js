@@ -26,7 +26,7 @@ class Firebird {
                 if (err) {
                     throw err;
                 }
-                transaction.query("INSERT INTO " + query[2] + " (ID, NOMBRE) VALUES(" + query[3] + "  , '" + query[4][1] + "')", function (err, result) {
+                transaction.query("INSERT INTO " + query[1] + " (ID, NOMBRE) VALUES(" + query[2] + "  , '" + query[3][1] + "')", function (err, result) {
                     if (err){
                         transaction.rollback();
                         throw err;
@@ -41,7 +41,7 @@ class Firebird {
         this.firebird.attach(this.options, function (err, db) {
             if (err)
                 throw err;
-            db.query("DELETE FROM " + query[2] + " WHERE ID = " + query[3], function (err, result) {
+            db.query("DELETE FROM " + query[1] + " WHERE ID = " + query[2], function (err, result) {
                 if (err)
                     throw err;
                 db.detach();
@@ -50,11 +50,11 @@ class Firebird {
     }
 
     async update(query) {
-        query[4] = query[4].split('=');
+        query[4] = query[3].split('=');
         this.firebird.attach(this.options, function (err, db) {
             if (err)
                 throw err;
-            db.query("UPDATE " + query[2] + " SET " + query[4][0] + " = '" + query[4][1] + "' WHERE ID = " + query[3], function (err, result) {
+            db.query("UPDATE " + query[1] + " SET " + query[3][0] + " = '" + query[3][1] + "' WHERE ID = " + query[2], function (err, result) {
                 if (err)
                     throw err;
                 db.detach();
@@ -89,7 +89,7 @@ class Firebird {
 
     async select(query) {
         const db = await this.attach(),
-            _query = 'SELECT * FROM ' + query[2],
+            _query = 'SELECT * FROM ' + query[1],
             result = await this.query(db, _query);
 
         for (var row of result) {

@@ -23,7 +23,7 @@ const server = net.createServer(function (socket) {
 		fs.appendFileSync("./Log/log.txt",today.toLocaleString() + ' ' + query.toString() +"\n");
 
 
-		switch (query[1]) {
+		switch (query[0]) {
 				case 'INSERT':	
 					await pg.insert(query);
 					await firebird.insert(query);

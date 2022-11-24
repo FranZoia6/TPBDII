@@ -24,6 +24,7 @@ class Postgres {
         console.log(query);
         row[query[4][0]] = query[4][1];
         await model.create(row);
+        console.log(model);
         return;
     }
 

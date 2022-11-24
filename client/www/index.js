@@ -3,7 +3,6 @@
             .addEventListener('click', function() {
                 var cmd = [],
                  operacion = document.getElementById('operacion').value;
-                cmd.push(document.getElementById('motor').value);
                 cmd.push(operacion);
                 cmd.push(document.getElementById('tabla').value);
                 cmd.push(document.getElementById('id').value);
