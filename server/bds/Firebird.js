@@ -13,7 +13,13 @@ class Firebird {
         this.options.pageSize = 4096;        // default when creating database
         this.options.retryConnectionInterval = 1000; // reconnect interval in case of connection drop
         this.options.blobAsText = false; // set to true to get blob as text, only affects blob subtype 1
-    }
+   }
+   /*
+    commit(){
+        transaction.commit();
+        db.detach();
+        Nehuen ayuda
+    }*/
 
     async insert(query) {
         //query[4] = query[4].split('=');

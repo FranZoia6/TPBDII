@@ -25,10 +25,16 @@ const server = net.createServer(function (socket) {
 
 		switch (query[0]) {
 				case 'INSERT':	
+				try {
 					await pg.insert(query);
-					await firebird.insert(query);
-					await r.insert(query);
 					await mongodb.insert(query);
+					await r.insert(query);
+				} catch (error) {
+					console.log(error)
+					socket.write('ERROR: ' + error.toString());
+					
+				}
+				//await firebird.insert(query);
 					socket.write('.');
 					break;
 

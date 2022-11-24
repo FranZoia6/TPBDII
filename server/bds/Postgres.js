@@ -20,9 +20,9 @@ class Postgres {
         const model = await this.setModel(query);
         console.log(query);
         let row = {};
-        query[4] = query[4].split('=');
+        query[3] = query[3].split('=');
         console.log(query);
-        row[query[4][0]] = query[4][1];
+        row[query[3][0]] = query[3][1];
         await model.create(row);
         console.log(model);
         return;
@@ -60,11 +60,11 @@ class Postgres {
 
     async setModel(query) {
         let schema = await this.postgres.getQueryInterface()
-            .describeTable(query[2]);
+            .describeTable(query[1]);
         schema.id.autoIncrement = true;
         delete schema.id.defaultValue;
-        const model = this.postgres.define(query[2], schema, {
-            tableName: query[2],
+        const model = this.postgres.define(query[1], schema, {
+            tableName: query[1],
             timestamps: false
         });
 
