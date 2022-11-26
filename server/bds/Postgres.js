@@ -1,6 +1,8 @@
+const { INTEGER } = require('sequelize');
+
 class Postgres {
     constructor() {
-        const sequelize = require('sequelize');
+         this.sequelize = require('sequelize');
 
         const DB_USER = 'postgres',
             DB_PASS = 'postgres',
@@ -10,30 +12,37 @@ class Postgres {
                 dialect: 'postgres',
                 logging: false
             };
-        this.postgres = new sequelize(DB_NAME,
+        this.postgres = new this.sequelize(DB_NAME,
             DB_USER,
             DB_PASS,
             DB_CONNECTION);
+        this.version = 0;
+    }
+
+    getVersion(){
+        return this.version;
+    }
+
+    setVersion(version){
+        this.version = version;
     }
 
     async insert(query) {
         const model = await this.setModel(query);
-        console.log(query);
         let row = {};
         query[3] = query[3].split('=');
-        console.log(query);
         row[query[3][0]] = query[3][1];
+        row['cod'] = Number(query[2]);
         await model.create(row);
-        console.log(model);
         return;
     }
 
     async update(query) {
         const model = await this.setModel(query);
         let row = {};
-        query[4] = query[4].split('=');
-        row[query[4][0]] = query[4][1];
-        const where = { id: query[3] },
+        query[3] = query[3].split('=');
+        row[query[3][0]] = query[3][1];
+        const where = { cod: query[2] },
         obj = await model.findOne({ where });
         if (obj) {
             await obj.update(row);
@@ -43,7 +52,7 @@ class Postgres {
 
     async delete(query) {
         const model = await this.setModel(query);
-        const where = { id: query[3] },
+        const where = { cod: query[2] },
             obj = await model.findOne({ where });
         if (obj) {
             await obj.destroy();
@@ -64,12 +73,23 @@ class Postgres {
         schema.id.autoIncrement = true;
         delete schema.id.defaultValue;
         const model = this.postgres.define(query[1], schema, {
+
             tableName: query[1],
             timestamps: false
         });
 
         return model;
 
+    }
+
+    async isConnected(){
+    try{
+       await this.postgres.query('Select 1',{raw:true  });//this.sequelize.QueryType.SELECT
+        return true ; 
+    }catch(err){
+        return false;
+    } 
+    
     }
 
 

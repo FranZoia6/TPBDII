@@ -3,65 +3,130 @@ const net = require('net');
 const fs = require('fs')
 const { Console } = require('console');
 const Postgres = require("./bds/Postgres");
-const Redis = require("./bds/Redis");
-const Firebird = require("./bds/Firebird");
 const Mongodb = require("./bds/Mongodb")
-const rethink = require("./bds/Rethink");// Implementar y probar rethink
-var pg = new Postgres();
-var r = new Redis();
-var firebird = new Firebird();
-var mongodb = new Mongodb;
+var master = new Postgres();// Aca declaramos a postgres como maestro
+var esclavo = new Mongodb; // Aca declaramos a mongo como el esclavo  
 // -----------------------------------------------
 
+
 // -----------------------------------------------
-//Conectar Servidor para poder tener concurrencia 
 const server = net.createServer(function (socket) {
 	socket.on('data', async function (query) {
 		console.log('EJECUTAR QUERY: ' + query);
 		query = query.toString().split(':');
 		var today = new Date();
-		fs.appendFileSync("./Log/log.txt",today.toLocaleString() + ' ' + query.toString() +"\n");
+		fs.appendFileSync("./Log/log.txt", today.toLocaleString() + ' ' + query.toString() + "\n");
 
 
 		switch (query[0]) {
-				case 'INSERT':	
-				try {
-					await pg.insert(query);
-					await mongodb.insert(query);
-					await r.insert(query);
-				} catch (error) {
-					console.log(error)
-					socket.write('ERROR: ' + error.toString());
-					
+			case 'INSERT':
+				var masterVersion = master.getVersion();
+				var esclavoVersion = esclavo.getVersion();
+				var validacionMaster = await master.isConnected();
+				if (validacionMaster) {
+					await master.insert(query);
+					master.setVersion(masterVersion + 1)
+					var validacionEsclavo = await esclavo.isConnected();
+					if (validacionEsclavo) {
+						esclavo.setVersion(esclavoVersion + 1)
+						if (validacionEsclavo != esclavoVersion) {
+							datos = await master.select(query);
+							await esclavo.replicar(datos)
+
+						} else {
+							await esclavo.insert(query);
+						}
+					} else {
+						socket.write('ERROR: No se pudo conectar con el Esclavo');
+
+					}
+
+				} else {
+					socket.write('ERROR: No se pudo conectar con el maestro');
+
 				}
-				//await firebird.insert(query);
-					socket.write('.');
-					break;
+				socket.write('.');
+				break;
 
-				case 'UPDATE':
-					pg.update(query);
-					await r.insert(query);
-					await firebird.update(query);
-					mongodb.update(query);
-					socket.write('.');
-					break;
 
-				case 'DELETE':
-					pg.delete(query);
-					await r.delete(query);
-					await firebird.delete(query);
-					mongodb.delete(query);
-					socket.write('.');
-					break;
-				
-				case 'SELECT':
-					var datos = await mongodb.select(query);
+			case 'UPDATE':
+
+				var validacionMaster = await master.isConnected();
+				var masterVersion = master.getVersion();
+				var esclavoVersion = esclavo.getVersion();
+				if (validacionMaster) {
+					await master.update(query);
+					var validacionEsclavo = await esclavo.isConnected();
+					if (validacionEsclavo) {
+						esclavo.setVersion(esclavoVersion + 1)
+						if (validacionEsclavo != esclavoVersion) {
+							datos = await master.select(query);
+							await esclavo.replicar(datos)
+						} else {
+							await esclavo.update(query);
+						}
+
+					} else {
+						socket.write('ERROR: No se pudo conectar con el Esclavo');
+
+					}
+
+				} else {
+					socket.write('ERROR: No se pudo conectar con el maestro');
+
+				}
+				socket.write('.');
+				break;
+
+			case 'DELETE':
+				var validacionMaster = await master.isConnected();
+				var masterVersion = master.getVersion();
+				var validacionMaster = await master.isConnected();
+				if (validacionMaster) {
+					await master.delete(query);
+					var validacionEsclavo = await esclavo.isConnected();
+					if (validacionEsclavo) {
+						esclavo.setVersion(esclavoVersion + 1)
+						if (validacionEsclavo != esclavoVersion) {
+							datos = await master.select(query);
+							await esclavo.replicar(datos)
+						} else {
+							await esclavo.delete(query);
+						}
+
+					} else {
+						socket.write('ERROR: No se pudo conectar con el Esclavo');
+
+					}
+
+				} else {
+					socket.write('ERROR: No se pudo conectar con el maestro');
+
+				}
+				socket.write('.');
+				break;
+
+			case 'SELECT':
+				var validacionEsclavo = await esclavo.isConnected();
+				var validacionMaster = await master.isConnected();
+				var masterVersion = master.getVersion();
+				var validacionMaster = await master.isConnected();
+				if (validacionEsclavo != esclavoVersion && validacionMaster) {
+					datos = await master.select(query);
+					await esclavo.replicar(datos)
+				}
+				if (validacionEsclavo) {
+					var datos = await esclavo.select(query);
 					socket.write(JSON.stringify(datos));
-					socket.write('.');
-					break;
+				}else{
+					socket.write('ERROR: No se pudo conectar a la base de datos');
+				}
+				
+				socket.write('.');
+				break;
 
 			default:
-				socket.write(query[1] + ' NO IMPLEMENTADO AUN.');
+				socket.write('ERROR: ' + query[1] + ' NO IMPLEMENTADO AUN.');
 				break;
 		}
 	});
@@ -78,6 +143,8 @@ const server = net.createServer(function (socket) {
 	});
 });
 
+
 server.listen(1337);
-console.log("Escuchando")
+console.log("Escuchando");
 // -----------------------------------------------
+
